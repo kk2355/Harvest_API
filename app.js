@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var _ = require('lodash');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -13,6 +14,19 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+// set database
+var mysqlConfig = require('./config/mysql_config.json');
+var mysql = require('mysql');
+var db = mysql.createPool(_.extend(
+  {
+    host: process.env.DB_HOST || mysqlConfig.host,
+    user: process.env.DB_USER || mysqlConfig.user,
+    password: process.env.DB_PASS || mysqlConfig.password,
+    database: process.env.DB_NAME || mysqlConfig.database,
+  }, mysqlConfig.opt)
+);
+global.db = db;
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
