@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var _ = require('lodash');
+var async = require('async');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -56,5 +57,53 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+///////////////////////////////////////////////////////////
+////////////////////テストコード/////////////////////////////
+///////////////////////////////////////////////////////////
+var FeedParser = require('feedparser');  
+var request = require('request');  
+
+async.parallel([
+	// rssテーブルとrss_categoryテーブルをJOINして抽出
+	function(callback) {
+		db.query('SELECT `rss`.id, `rss`.name, url, `rss_category`.name as category_name FROM `rss` LEFT JOIN `rss_category` ON `rss`.rss_category_id = `rss_category`.id', function(err,rows,fields) {
+			callback(err,rows);
+		});
+	}
+],function(err,rssList) {
+	if(err) throw err;
+	_.chain(rssList)
+	.first()
+	.each(function(rss){
+		// とりあえずrss毎に処理を繰り返す想定。INSERTだかUPDATEだかはrss毎に１発で流したい。
+		var feedparser = new FeedParser({});
+		var req = request(rss.url);
+		var items = [];
+		req.on('response', function(res) {
+			this.pipe(feedparser);
+		});
+
+		feedparser.on('readable', function() {  
+		  while(item = this.read()) {
+		    // console.log(item);
+		    items.push(item);
+		  }
+		});
+		// この後SQLを流すことになる。一旦比較は考えない
+		feedparser.on('end', function() {
+			// 挿入するデータの整形
+			var feeds = _.map(items, function(item) {
+				return [rss.id,item.title,item.link,rss.category_name,item.date,new Date()];
+			});
+			// 一旦コメントアウト
+			// db.query('INSERT INTO `feed` (`rss_id`, `title`, `url`, `category`, `date`, `update_time`) VALUES' + db.escape(feeds),function(err,rows){
+		 //      console.log(err,rows);
+		 //    });
+			console.log('-----');
+		});
+	})
+	.value();
+})
 
 module.exports = app;
