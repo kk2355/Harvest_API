@@ -96,10 +96,11 @@ async.parallel([
 			var feeds = _.map(items, function(item) {
 				return [rss.id,item.title,item.link,rss.category_name,item.date,new Date()];
 			});
-			// 一旦コメントアウト
-			// db.query('INSERT INTO `feed` (`rss_id`, `title`, `url`, `category`, `date`, `update_time`) VALUES' + db.escape(feeds),function(err,rows){
-		 //      console.log(err,rows);
-		 //    });
+		 	// 同じurlのfeedがあれば更新を行い、なければ挿入する
+		 	db.query('INSERT INTO `feed` (`rss_id`, `title`, `url`, `category`, `date`, `update_time`) VALUES' + db.escape(feeds) + 
+		 		'ON DUPLICATE KEY UPDATE `title` = VALUES(`title`), `date` = VALUES(`date`), `update_time` = VALUES(`update_time`)',function(err,rows){
+		      console.log(err,rows);
+		    });
 			console.log('-----');
 		});
 	})
