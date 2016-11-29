@@ -10,7 +10,9 @@ var async = require('async');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
+var corser = require("corser");
 var app = express();
+app.use(corser.create());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
