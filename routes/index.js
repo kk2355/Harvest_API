@@ -43,12 +43,9 @@ router.get("/harvest", function(req, res) {
 		}
 	],function(err) {
 		if(err) throw err;
-		var response = {
-			linkCollection: linkCollection
-		}
 
 		res.contentType("application/json");
-    	res.end(JSON.stringify(response));
+    	res.end(JSON.stringify(linkCollection));
 	});
 });
 
