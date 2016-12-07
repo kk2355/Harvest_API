@@ -5,7 +5,7 @@ var async = require('async');
 var _ = require('lodash');
 var app = require('../app');
 
-cron.schedule('0 0 6 * * *', () => {
+cron.schedule('0 0 * * * *', () => {
   	//定期的に実行する
   	async.parallel([
 		// rssテーブルとrss_categoryテーブルをJOINして抽出
