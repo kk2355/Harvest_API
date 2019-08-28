@@ -1,7 +1,7 @@
 {
   "host" : "localhost",
   "user" : "harvest",
-  "password" : "harvestpass",
+  "password" : "harvestpass2355",
   "database" : "harvest",
   "opt" : {
     "dateStrings" : "DATETIME",
